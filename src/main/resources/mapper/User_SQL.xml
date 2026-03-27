@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hkapp.module.security.mapper.UserMapper">
+
+    <resultMap id="userResultMap" type="com.hkapp.module.security.vo.UserVO">
+        <id     property="userId"   column="USER_ID"/>
+        <result property="userNm" column="USER_NM"/>
+        <result property="pwd" column="PWD"/>
+        <result property="regDt"    column="REG_DT"/>
+        <result property="email"    column="EMAIL"/>
+    </resultMap>
+
+    <select id="selectUserByUsername" parameterType="string" resultMap="userResultMap">
+        SELECT USER_ID,
+               USER_NM,
+               PWD,
+               REG_DT,
+               EMAIL
+        FROM   USER_INFO
+        WHERE  USER_ID = #{userId}
+
+    </select>
+
+    <insert id="insertUser" parameterType="com.hkapp.module.security.vo.UserVO">
+        INSERT INTO USER_INFO (
+            USER_ID,
+            USER_NM,
+            PWD,
+            EMAIL,
+            REG_DT
+        ) VALUES (
+                     #{userId},
+                     #{userNm},
+                     #{pwd},
+                     #{email},
+                     SYSDATE
+                 )
+    </insert>
+
+
+    <select id="countByEmail" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM   USER_INFO
+        WHERE  EMAIL = #{email}
+    </select>
+
+</mapper>

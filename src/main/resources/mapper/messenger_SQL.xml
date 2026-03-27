@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hkapp.module.messenger.mapper.MessengerMapper">
+
+    <select id="selectMessengerRoomsListCnt" parameterType="map" resultType="int">
+        /*selectMessengerRoomsListCnt*/
+        SELECT COUNT(*)
+        FROM CHAT_ROOM r
+        JOIN CHAT_ROOM_MEMBER m
+        ON r.ROOM_ID = m.ROOM_ID
+        WHERE m.USER_ID = #{loginId}
+        AND r.ACTIVE_YN = 'Y'
+
+        <if test="searchValue != null and searchValue != ''">
+            AND (
+            r.TITLE LIKE '%' || #{searchValue} || '%'
+            )
+        </if>
+
+    </select>
+
+    <select id="selectMessengerRoomsList" parameterType="map" resultType="com.hkapp.module.messenger.vo.ChatRoomVO">
+        /*selectMessengerRoomsList*/
+        SELECT *
+        FROM (
+        SELECT
+        r.ROOM_ID,
+        r.ROOM_TYPE,
+        r.TITLE,
+        ROW_NUMBER() OVER (ORDER BY r.ROOM_ID DESC) AS RNUM,
+        (
+        SELECT cm.CONTENT
+        FROM CHAT_MESSAGE cm
+        WHERE cm.ROOM_ID = r.ROOM_ID
+        AND cm.DELETED_YN = 'N'
+        ORDER BY cm.MESSAGE_ID DESC
+        FETCH FIRST 1 ROWS ONLY
+        ) AS LAST_MESSAGE,
+        (
+        SELECT cm.CREATED_AT
+        FROM CHAT_MESSAGE cm
+        WHERE cm.ROOM_ID = r.ROOM_ID
+        AND cm.DELETED_YN = 'N'
+        ORDER BY cm.MESSAGE_ID DESC
+        FETCH FIRST 1 ROWS ONLY
+        ) AS LAST_MESSAGE_AT,
+        (
+        SELECT COUNT(*)
+        FROM CHAT_MESSAGE cm
+        WHERE cm.ROOM_ID = r.ROOM_ID
+        AND cm.MESSAGE_ID > m.LAST_READ_MESSAGE_ID
+        AND cm.DELETED_YN = 'N'
+        ) AS UNREAD_COUNT
+        FROM CHAT_ROOM r
+        JOIN CHAT_ROOM_MEMBER m
+        ON r.ROOM_ID = m.ROOM_ID
+        WHERE m.USER_ID = #{loginId}
+        AND r.ACTIVE_YN = 'Y'
+        ORDER BY r.UPDATED_AT DESC NULLS LAST, r.ROOM_ID DESC
+        )
+
+    </select>
+
+    <select id="selectMessengerRoomsListWithoutPaging" parameterType="map" resultType="com.hkapp.module.messenger.vo.ChatRoomVO">
+        /*selectMessengerRoomsListWithoutPaging*/
+        SELECT
+        r.ROOM_ID,
+        r.ROOM_TYPE,
+        r.TITLE,
+        (
+        SELECT cm.CONTENT
+        FROM CHAT_MESSAGE cm
+        WHERE cm.ROOM_ID = r.ROOM_ID
+        AND cm.DELETED_YN = 'N'
+        ORDER BY cm.MESSAGE_ID DESC
+        FETCH FIRST 1 ROWS ONLY
+        ) AS LAST_MESSAGE,
+        (
+        SELECT cm.CREATED_AT
+        FROM CHAT_MESSAGE cm
+        WHERE cm.ROOM_ID = r.ROOM_ID
+        AND cm.DELETED_YN = 'N'
+        ORDER BY cm.MESSAGE_ID DESC
+        FETCH FIRST 1 ROWS ONLY
+        ) AS LAST_MESSAGE_AT,
+        (
+        SELECT COUNT(*)
+        FROM CHAT_MESSAGE cm
+        WHERE cm.ROOM_ID = r.ROOM_ID
+        AND cm.MESSAGE_ID > m.LAST_READ_MESSAGE_ID
+        AND cm.DELETED_YN = 'N'
+        ) AS UNREAD_COUNT
+        FROM CHAT_ROOM r
+        JOIN CHAT_ROOM_MEMBER m
+        ON r.ROOM_ID = m.ROOM_ID
+        WHERE m.USER_ID = #{loginId}
+        AND r.ACTIVE_YN = 'Y'
+        <if test="searchValue != null and searchValue != ''">
+            AND (
+            r.TITLE LIKE '%' || #{searchValue} || '%'
+            )
+        </if>
+        ORDER BY r.UPDATED_AT DESC NULLS LAST, r.ROOM_ID DESC
+
+    </select>
+
+    <insert id="insertChatRoom" parameterType="com.hkapp.module.messenger.vo.ChatRoomVO">
+        /*insertChatRoom*/
+        INSERT
+        INTO CHAT_ROOM(
+         TITLE
+        , CREATED_BY
+        , CREATED_AT
+        , ACTIVE_YN
+        , ROOM_ID)
+        VALUES(
+         #{title}
+        , #{loginId}
+        , SYSTIMESTAMP
+        , 'Y'
+        , #{roomId})
+
+    </insert>
+
+    <insert id="insertChatRoomMember" parameterType="com.hkapp.module.messenger.vo.ChatRoomMemberVO">
+        /*insertChatRoomMember*/
+        INSERT
+        INTO CHAT_ROOM_MEMBER(
+            USER_ID
+            , MEMBER_ROLE
+            , JOINED_AT
+            , ROOM_ID
+            , MEMBER_NM)
+        VALUES(
+            #{userId}
+            , #{memberRole}
+            , SYSTIMESTAMP
+            , #{roomId}
+            , #{memberNm})
+    </insert>
+
+    <select id="selectChatRoomMemberList" parameterType="map" resultType="com.hkapp.module.messenger.vo.ChatRoomMemberVO">
+        /*selectChatRoomMemberList*/
+        SELECT
+            USER_ID
+            , MEMBER_ROLE
+            , JOINED_AT
+            , LEFT_AT
+            , LAST_READ_MESSAGE_ID
+            , ROOM_ID
+            , MEMBER_NM
+        FROM CHAT_ROOM_MEMBER
+        WHERE ROOM_ID = #{roomId}
+    </select>
+
+    <select id="selectUser" parameterType="string" resultType="java.util.HashMap">
+        /*selectUser*/
+        SELECT
+            A.USER_ID AS "userId"
+            ,A.USER_NM AS "userNm"
+        FROM USER_INFO A
+        WHERE A.USER_ID LIKE '%' || #{userId} || '%'
+        OR A.USER_NM LIKE '%' || #{userNm} || '%'
+
+    </select>
+
+    <update id="updateChatRoom" >
+        /*updateChatRoom*/
+        UPDATE CHAT_ROOM
+        SET
+            ROOM_TYPE = #{roomType}
+            , TITLE = #{title}
+            , UPDATED_AT = SYSDATE
+        <if test="activeYn != null and activeYn != ''">
+            , ACTIVE_YN = #{activeYn}
+        </if>
+        WHERE ROOM_ID = #{roomId}
+    </update>
+
+    <select id="selectOnlineUsers" resultType="map">
+        /*selectOnlineUsers*/
+        SELECT LGN_ID AS "userId"
+        FROM CNTN_LOG
+        WHERE CNTN_DT >= SYSDATE - 1/24
+        AND LGN_ID IS NOT NULL
+        GROUP BY LGN_ID
+        ORDER BY MAX(CNTN_DT) DESC
+
+    </select>
+
+    <insert id="insertMessage" parameterType="com.hkapp.module.messenger.vo.ChatMessageVO">
+        /*insertMessage*/
+        INSERT INTO CHAT_MESSAGE(
+                  MESSAGE_ID
+                , USER_ID
+                , CONTENT
+                , CREATED_AT
+                , DELETED_YN
+                , ROOM_ID)
+        VALUES(
+                #{messageId}
+              , #{userId}
+              , #{content}
+              , SYSTIMESTAMP
+              , 'N'
+              , #{roomId})
+    </insert>
+
+    <select id="selectLatestMessage" resultType="com.hkapp.module.messenger.dto.ChatMessageResponse">
+        /*selectLatestMessage*/
+        SELECT
+            MESSAGE_ID    AS "messageId",
+            ROOM_ID   AS "roomId",
+            USER_ID AS "senderId",
+            CONTENT   AS "content",
+            TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') AS "createdAt"
+        FROM CHAT_MESSAGE
+        WHERE ROOM_ID = #{roomId}
+          AND USER_ID = #{userId}
+        ORDER BY CREATED_AT DESC
+            FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <select id="selectMessageList" parameterType="com.hkapp.module.messenger.vo.ChatMessageVO" resultType="com.hkapp.module.messenger.vo.ChatMessageVO">
+        /*selectMessageList*/
+        SELECT
+            MESSAGE_ID
+             , USER_ID AS "senderId"
+             , CONTENT
+             , CREATED_AT
+             , EDITED_AT
+             , DELETED_YN
+             , ROOM_ID
+        FROM CHAT_MESSAGE
+        WHERE ROOM_ID = #{roomId}
+    </select>
+
+</mapper>

@@ -1,0 +1,27 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: messenger
+
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1523/XE
+    username: HK_MESSENGER
+    password: pass
+    driver-class-name: oracle.jdbc.OracleDriver
+
+mybatis:
+  mapper-locations: classpath:/mapper/*.xml
+
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    org.springframework.web: info
+    org.hibernate.SQL: debug
+    org.springframework.security: DEBUG
+    org.hibernate.type.descriptor.sql: trace
+    org.mybatis: debug
