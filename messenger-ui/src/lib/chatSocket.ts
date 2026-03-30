@@ -1,6 +1,10 @@
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
+const wsUrl = import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL}/ws`
+    : 'http://localhost:8085/hk/ws';
+
 let stompClient: Client | null = null;
 
 export function connectSocket(onConnect?: () => void) {

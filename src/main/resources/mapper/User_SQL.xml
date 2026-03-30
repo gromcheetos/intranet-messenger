@@ -20,7 +20,7 @@
                EMAIL
         FROM   USER_INFO
         WHERE  USER_ID = #{userId}
-
+        AND USE_YN = 'Y'
     </select>
 
     <insert id="insertUser" parameterType="com.hkapp.module.security.vo.UserVO">
@@ -35,7 +35,7 @@
                      #{userNm},
                      #{pwd},
                      #{email},
-                     SYSDATE
+                     NOW()
                  )
     </insert>
 

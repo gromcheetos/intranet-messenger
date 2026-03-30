@@ -130,8 +130,6 @@ public class SequenceIdServiceImpl implements SequenceIdService {
             CREATE SEQUENCE %s
                 START WITH 1
                 INCREMENT BY 1
-                NOCACHE
-                NOCYCLE
             """.formatted(seqName);
         jdbcTemplate.execute(sql);
     }

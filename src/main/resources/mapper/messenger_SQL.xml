@@ -36,7 +36,7 @@
         WHERE cm.ROOM_ID = r.ROOM_ID
         AND cm.DELETED_YN = 'N'
         ORDER BY cm.MESSAGE_ID DESC
-        FETCH FIRST 1 ROWS ONLY
+        LIMIT 1
         ) AS LAST_MESSAGE,
         (
         SELECT cm.CREATED_AT
@@ -44,7 +44,7 @@
         WHERE cm.ROOM_ID = r.ROOM_ID
         AND cm.DELETED_YN = 'N'
         ORDER BY cm.MESSAGE_ID DESC
-        FETCH FIRST 1 ROWS ONLY
+        LIMIT 1
         ) AS LAST_MESSAGE_AT
         FROM CHAT_ROOM r
         JOIN CHAT_ROOM_MEMBER m
@@ -120,7 +120,7 @@
         UPDATE CHAT_ROOM
         SET
              TITLE = #{title}
-            , UPDATED_AT = SYSDATE
+            , UPDATED_AT = NOW()
         <if test="activeYn != null and activeYn != ''">
             , ACTIVE_YN = #{activeYn}
         </if>
@@ -131,7 +131,7 @@
         /*selectOnlineUsers*/
         SELECT LGN_ID AS "userId"
         FROM CNTN_LOG
-        WHERE CNTN_DT >= SYSDATE - 1/24
+        WHERE CNTN_DT >= NOW() - 1/24
         AND LGN_ID IS NOT NULL
         GROUP BY LGN_ID
         ORDER BY MAX(CNTN_DT) DESC
@@ -168,7 +168,7 @@
         WHERE ROOM_ID = #{roomId}
           AND USER_ID = #{userId}
         ORDER BY CREATED_AT DESC
-            FETCH FIRST 1 ROWS ONLY
+            LIMIT 1
     </select>
 
     <select id="selectMessageList" parameterType="com.hkapp.module.messenger.vo.ChatMessageVO" resultType="com.hkapp.module.messenger.vo.ChatMessageVO">
