@@ -6,6 +6,7 @@ import com.hkapp.module.messenger.service.MessengerService;
 import com.hkapp.module.messenger.vo.ChatMessageVO;
 import com.hkapp.module.messenger.vo.ChatRoomMemberVO;
 import com.hkapp.module.messenger.vo.ChatRoomVO;
+import com.hkapp.module.security.vo.UserVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.RequestEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @Slf4j
@@ -25,12 +27,11 @@ public class MessengerApiController {
     private final OnlineUserRegistry onlineUserRegistry;
 
     @GetMapping("/rooms")
-
     public ResponseEntity<Map> list(ChatRoomVO searchVO){
         Map result = new HashMap();
 
         result = messengerService.selectMessengerRoomsList(searchVO);
-        //result.put("page", searchVO.getPageMap());
+
         result.put("status", "SUCCESS");
 
         return ResponseEntity.ok(result);
@@ -60,6 +61,7 @@ public class MessengerApiController {
     public ResponseEntity<Map> updateRoom(@PathVariable String roomId, @RequestBody ChatRoomVO vo) throws Exception {
         Map result = new HashMap();
         vo.setRoomId(roomId);
+
         int cnt = messengerService.updateChatRoom(vo);
         if(cnt > 0) {
             result.put("status", "SUCCESS");
@@ -90,11 +92,20 @@ public class MessengerApiController {
 
     @GetMapping("/users/online")
     public ResponseEntity<Map<String, Object>> getOnlineUsers() {
-        Map result = new HashMap();
-        result.put("status", "SUCCESS");
-        result.put("data", onlineUserRegistry.getOnlineUserIds());
-        result.put("count", onlineUserRegistry.getOnlineCount());
-        return ResponseEntity.ok(result);
+        List<UserVO> onlineUsers = messengerService
+                .getOnlineUsers(onlineUserRegistry.getOnlineUserIds());
+        List<Map<String, String>> returnUsers = onlineUsers.stream()
+                .map(u -> Map.of(
+                        "userId", u.getUserId(),
+                        "userNm", u.getUserNm() != null ? u.getUserNm() : "",
+                        "email",  u.getEmail()  != null ? u.getEmail()  : ""
+                ))
+                .toList();
+        return ResponseEntity.ok(Map.of(
+                "status", "SUCCESS",
+                "data",   returnUsers,
+                "count",  returnUsers.size()
+        ));
     }
 
     @GetMapping("/room/members/{roomId}") // Done
@@ -108,7 +119,6 @@ public class MessengerApiController {
     }
 
     @PostMapping("/room/members/invite/{roomId}") //Done
-
     public ResponseEntity<HashMap> inviteMember(@RequestBody String userNm, @PathVariable String roomId) throws Exception {
         HashMap result = new HashMap();
         ChatRoomMemberVO vo = new ChatRoomMemberVO();
@@ -136,4 +146,27 @@ public class MessengerApiController {
         return ResponseEntity.ok(result);
     }
 
+    @DeleteMapping("/room/delete/{roomId}")
+    public ResponseEntity<Map> deleteRoom(@PathVariable String roomId) throws Exception {
+        ChatRoomMemberVO vo = new ChatRoomMemberVO();
+        vo.setRoomId(roomId);
+        vo.setUserId(CommonUtil.getLoginId());
+        int deleted = messengerService.deleteChatRoom(vo);
+        if(deleted > 0) {
+            return ResponseEntity.ok(Map.of("status", "SUCCESS", "result", deleted));
+        }
+        return ResponseEntity.ok(Map.of("data", roomId));
+    }
+
+    @DeleteMapping("/room/{roomId}/members/{userId}")
+    public ResponseEntity<Map> deleteMember(@PathVariable String roomId, @PathVariable String userId) throws Exception {
+        ChatRoomMemberVO vo = new ChatRoomMemberVO();
+        vo.setRoomId(roomId);
+        vo.setUserId(userId);
+        int deleted = messengerService.deleteMember(vo);
+        if(deleted > 0) {
+            return ResponseEntity.ok(Map.of("status", "SUCCESS", "result", deleted));
+        }
+        return ResponseEntity.ok(Map.of("data", roomId));
+    }
 }

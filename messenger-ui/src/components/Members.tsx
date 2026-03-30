@@ -94,7 +94,13 @@ export default function ChannelMembers({ roomId, onClose }: ChannelMembersProps)
                                         <p className="text-xs text-gray-500">
                                             Joined {new Date(member.joinedAt).toLocaleDateString()}
                                         </p>
+                                        {member.userId === user?.userId && (
+                                            <p className="text-xs text-gray-500 mt-1">(You)</p>
+                                        )}
                                     </div>
+                                    {member.memberRole === "OWNER" && (
+                                        <p className="text-xs text-gray-500 mt-1">OWNER</p>
+                                    )}
                                     {user?.userId !== member.userId && (
                                         <button
                                             onClick={() => handleRemoveMember(member.userId, member.memberNm)}

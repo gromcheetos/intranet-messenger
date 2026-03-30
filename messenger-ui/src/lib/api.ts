@@ -161,35 +161,35 @@ class ApiClient {
         });
 
         if(response.status != 'SUCCESS') throw new Error(response.message || 'Failed to send message');
-       /* return {content: response.data.content,
-                roomId: response.data.roomId,
-                userId: response.data.userId,
-                createdAt: response.data.createdAt,
-                messageId: response.data.messageId,
-        };*/
+
         return response.data;
     }
 
     async createChatRoom(title: string): Promise<ChatRoom> {
         return this.request<ChatRoom>(`${BASE}/messenger/newRoom`, {
             method: 'POST',
-            body: JSON.stringify({ title}),
+            body: JSON.stringify({title}),
         });
     }
 
-    async updateChatRoom(roomId: string, title: string): Promise<ChatRoom> {
+    async updateChatRoom(roomId: string, title: string, activeYn: string): Promise<ChatRoom> {
         const response = await this.request<ApiResponse<ChatRoom>>(`${BASE}/messenger/room/${roomId}`, {
             method: 'PUT',
-            body: JSON.stringify({ title }),
+            body: JSON.stringify({ title, activeYn }),
         });
 
         return response.data;
     }
 
     async deleteChatRoom(roomId: string): Promise<void> {
-        return this.request<void>(`${BASE}/messenger/room/${roomId}`, {
+        const response = await this.request<ApiResponse<any>>(`${BASE}/messenger/room/delete/${roomId}`, {
             method: 'DELETE',
+
         });
+        if(response.status != 'SUCCESS') throw new Error(response.message || 'Failed to delete room');
+        if(response.status == 'SUCCESS')
+            alert("This room has been deleted by the owner.")
+        return;
     }
 
     async getChannelMembers(roomId: string): Promise<ChannelMember[]> {
@@ -227,11 +227,13 @@ class ApiClient {
         const response = await this.request<ApiResponse<User[]>>(`${BASE}/messenger/users/online`);
         if (response.status != 'SUCCESS') throw new Error(response.message || 'Failed to fetch online users');
 
-        return (response.data ?? []).map((user): User =>({
+        const onlineUserIds: User[] = response.data ?? [];
+
+        return onlineUserIds.map((user): User => ({
             userId: user.userId,
-            userNm: user.userNm || '',
-            email: user.email || '',
-        }))
+            userNm: user.userNm ||'',
+            email: user.email ||'',
+        }));
     }
 }
 

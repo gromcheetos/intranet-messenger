@@ -33,8 +33,8 @@ export default function Messenger() {
     useEffect(() => {
         if (!selectedRoom || !socketConnected) return;
 
-        loadChannel();
-        loadMessages();
+        loadChannel(selectedRoom);
+        loadMessages(selectedRoom);
         loadOnlineUsers();
 
         if (subscriptionRef.current) {
@@ -54,12 +54,11 @@ export default function Messenger() {
         };
     }, [selectedRoom, socketConnected]);
 
-    const loadChannel = async () => {
-        if (!selectedRoom) return;
+    const loadChannel = async (roomId: string) => {
 
         try {
             const response = await apiClient.getChatRooms();
-            const channel = response.data?.find(c => c.roomId === selectedRoom);
+            const channel = response.data?.find(c => c.roomId === roomId);
             if (channel) {
                 setCurrentRoom(channel);
             }
@@ -68,17 +67,18 @@ export default function Messenger() {
         }
     };
 
-    const loadMessages = async () => {
-        if (!selectedRoom) return;
-
+    const loadMessages = async (roomId: string) => {
         setLoadingMessages(true);
+        setMessages([]);
         try {
-            const message = await apiClient.getMessages(selectedRoom);
+            const message = await apiClient.getMessages(roomId);
 
-            if (message.length > 0) {
+            const sorted = [...message].sort((a, b) =>
+                new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
 
-                setMessages(message);
-            }
+            setMessages(sorted);
+
         } catch (error) {
             console.error('Failed to load messages:', error);
         } finally {
@@ -96,7 +96,7 @@ export default function Messenger() {
     };
 
     const handleMessageSent = () => {
-        loadMessages();
+        if (selectedRoom) loadMessages(selectedRoom);
     };
 
     return (

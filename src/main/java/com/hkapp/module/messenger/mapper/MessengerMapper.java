@@ -17,8 +17,6 @@ public interface MessengerMapper {
 
     List<ChatRoomVO> selectMessengerRoomsList(ChatRoomVO vo);
 
-    List<ChatRoomVO> selectMessengerRoomsListWithoutPaging(ChatRoomVO vo);
-
     int insertChatRoom(ChatRoomVO vo);
 
     int insertChatRoomMember(ChatRoomMemberVO vo);
@@ -36,4 +34,7 @@ public interface MessengerMapper {
     ChatMessageResponse selectLatestMessage(ChatMessageVO vo);
 
     List<ChatMessageVO> selectMessageList(String roomId);
+    ChatRoomMemberVO selectChatMember(ChatRoomMemberVO vo);
+    int deleteChatRoom(ChatRoomVO vo);
+    int deleteMember(ChatRoomMemberVO vo);
 }

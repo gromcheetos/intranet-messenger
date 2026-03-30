@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Hash, Plus, LogOut, MoreVertical, CreditCard as Edit2, Trash2, X, Check } from 'lucide-react';
 import { apiClient, ChatRoom, PageInfo } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
+import ToggleSwitch from "./ToggleSwitchProps.tsx";
 
 interface ChannelListProps {
     selectedRoom: string | null;
@@ -19,6 +20,7 @@ export default function ChannelList({ selectedRoom, onSelectRoom }: ChannelListP
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [activeYn, setActiveYn] = useState<string>('Y');
 
     useEffect(() => {
         loadChannels();
@@ -66,10 +68,11 @@ export default function ChannelList({ selectedRoom, onSelectRoom }: ChannelListP
         if (!editName.trim()) return;
 
         try {
-            const updated = await apiClient.updateChatRoom(channelId, editName.trim());
-            setChannels(channels.map(c => c.roomId === channelId ? updated : c));
+            const updated = await apiClient.updateChatRoom(channelId, editName.trim(), activeYn);
+            //setChannels(channels.map(c => c.roomId === channelId ? updated : c));
             setEditingId(null);
             setEditName('');
+            setActiveYn('Y');
             await loadChannels();
         } catch (error) {
             console.error('Failed to update channel:', error);
@@ -111,6 +114,7 @@ export default function ChannelList({ selectedRoom, onSelectRoom }: ChannelListP
                                         className="w-full px-2 py-1 bg-slate-600 text-white text-sm rounded outline-none focus:ring-2 focus:ring-blue-500"
                                         placeholder="Channel name"
                                         autoFocus/>
+                                    <ToggleSwitch value={activeYn} onChange={setActiveYn} />
                                     <div className="flex gap-1">
                                         <button
                                             onClick={() => handleSaveEdit(channel.roomId)}

@@ -43,8 +43,11 @@ export default function MessageList({ messages }: MessageListProps) {
   };
 
   const groupMessagesByDate = (messages: Message[]) => {
+    const sorted = [...messages].sort((a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
     const groups: { [key: string]: Message[] } = {};
-    messages.forEach((message) => {
+    sorted.forEach((message) => {
       const date = formatDate(message.createdAt);
       if (!groups[date]) {
         groups[date] = [];
@@ -75,12 +78,10 @@ export default function MessageList({ messages }: MessageListProps) {
             return (
               <div
                 key={message.messageId}
-                className={`flex gap-3 ${showAvatar ? 'mt-4' : 'mt-1'} ${isOwnMessage ? 'flex-row-reverse' : ''}`}
-              >
+                className={`flex gap-3 ${showAvatar ? 'mt-4' : 'mt-1'} ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
                 {showAvatar ? (
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-medium text-sm flex-shrink-0 ${
-                    isOwnMessage ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 'bg-gradient-to-br from-slate-500 to-slate-600'
-                  }`}>
+                    isOwnMessage ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 'bg-gradient-to-br from-slate-500 to-slate-600'}`}>
                     {senderName.charAt(0).toUpperCase()}
                   </div>
                 ) : (
@@ -101,8 +102,7 @@ export default function MessageList({ messages }: MessageListProps) {
                   <div className={`inline-block px-4 py-2 rounded-2xl max-w-xl break-words ${
                     isOwnMessage
                       ? 'bg-blue-600 text-white rounded-tr-sm'
-                      : 'bg-slate-100 text-gray-900 rounded-tl-sm'
-                  }`}>
+                      : 'bg-slate-100 text-gray-900 rounded-tl-sm'}`}>
                     {message.content}
                   </div>
                   {!showAvatar && (
@@ -116,6 +116,7 @@ export default function MessageList({ messages }: MessageListProps) {
           })}
         </div>
       ))}
+
       <div ref={messagesEndRef} />
     </div>
   );

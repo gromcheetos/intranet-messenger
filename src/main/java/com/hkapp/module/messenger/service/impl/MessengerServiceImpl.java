@@ -8,13 +8,12 @@ import com.hkapp.module.messenger.service.SequenceIdService;
 import com.hkapp.module.messenger.vo.ChatMessageVO;
 import com.hkapp.module.messenger.vo.ChatRoomMemberVO;
 import com.hkapp.module.messenger.vo.ChatRoomVO;
+import com.hkapp.module.security.mapper.UserMapper;
+import com.hkapp.module.security.vo.UserVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -23,6 +22,7 @@ public class MessengerServiceImpl  implements MessengerService {
     private final MessengerMapper messengerDAO;
     private static final Set<String> onlineUsers = ConcurrentHashMap.newKeySet();
 
+    private final UserMapper userMapper;
     private final SequenceIdService sequenceIdService;
 
     public Map selectMessengerRoomsList(ChatRoomVO vo){
@@ -80,8 +80,12 @@ public class MessengerServiceImpl  implements MessengerService {
         return messengerDAO.selectUser(userNm);
     }
 
-    public List<Map> selectOnlineUsers(){
-        return messengerDAO.selectOnlineUsers();
+    @Override
+    public List<UserVO> getOnlineUsers(Set<String> userIds) {
+        return userIds.stream()
+                .map(userMapper::selectUserByUsername)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     public int insertMessage(ChatMessageVO vo) {
@@ -108,5 +112,25 @@ public class MessengerServiceImpl  implements MessengerService {
 
     public List<ChatMessageVO> selectMessageList(String roomId){
         return messengerDAO.selectMessageList(roomId);
+    }
+
+    public int deleteChatRoom(ChatRoomMemberVO vo){
+        int cnt = 0;
+        ChatRoomMemberVO roomAuth = messengerDAO.selectChatMember(vo);
+        if("OWNER".equals(roomAuth.getMemberRole())){
+            ChatRoomVO roomVO = new ChatRoomVO();
+            roomVO.setRoomId(vo.getRoomId());
+            messengerDAO.deleteChatRoom(roomVO);
+            cnt ++;
+        }
+        return cnt;
+    }
+
+    public int deleteMember(ChatRoomMemberVO vo){
+        int cnt = 0;
+        if(messengerDAO.deleteMember(vo) > 0){
+            cnt ++;
+        }
+        return cnt;
     }
 }
