@@ -11,7 +11,7 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   build: {
-    outDir: '../src/main/webapp/messenger',
+    outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
       output: {
