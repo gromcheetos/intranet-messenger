@@ -48,7 +48,7 @@ interface ApiResponse<T> {
     result?: string;
 }
 
-const BASE = '/api';
+const BASE = `${API_URL}/api`;
 
 class ApiClient {
     private getHeaders() {
