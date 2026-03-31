@@ -6,30 +6,27 @@ export default defineConfig({
   plugins: [react({
     include: "**/*.{jsx,tsx,js,ts}",
   })],
-  base: '/messenger/',
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
   build: {
-    outDir: '../src/main/webapp/messenger',
+    outDir: 'dist',
     emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        entryFileNames: 'assets/index.js',
-        chunkFileNames: 'assets/[name].js',
-        assetFileNames: 'assets/[name].[ext]',
-      }
-    }
   },
   server: {
     port: 3000,
     proxy: {
-      '/wz/api': {
+      '/hk/api': {
         target: 'http://localhost:8085',
         changeOrigin: true,
         secure: false,
-      }
-    }
+      },
+      '/ws': {
+        target: 'http://localhost:8085',
+        changeOrigin: true,
+        ws: true,
+      },
+    },
   },
   define: {
     global: 'window',
