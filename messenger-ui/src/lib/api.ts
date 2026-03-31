@@ -58,7 +58,7 @@ class ApiClient {
     }
 
     async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-        const url = `${API_URL}${endpoint}`;
+        const url = `${endpoint}`;
         const response = await fetch(url, {
             ...options,
             headers: {
