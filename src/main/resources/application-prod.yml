@@ -21,4 +21,5 @@ mybatis:
 logging:
   level:
     root: WARN
-    com.example: INFO
+    com.hkapp: DEBUG
+    org.springframework.web: DEBUG
