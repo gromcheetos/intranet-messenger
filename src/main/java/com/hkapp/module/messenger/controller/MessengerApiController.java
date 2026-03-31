@@ -21,7 +21,7 @@ import java.util.Objects;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/hk/api/messenger")
+@RequestMapping("/api/messenger")
 public class MessengerApiController {
     private final MessengerService messengerService;
     private final OnlineUserRegistry onlineUserRegistry;

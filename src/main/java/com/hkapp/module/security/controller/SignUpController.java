@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/hk/api")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class SignUpController {
 

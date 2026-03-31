@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/hk/api")
+@RequestMapping("/api")
 public class AuthController {
 
     @GetMapping("/auth/me")
