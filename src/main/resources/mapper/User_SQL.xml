@@ -29,13 +29,15 @@
             USER_NM,
             PWD,
             EMAIL,
-            REG_DT
+            REG_DT,
+            USE_YN
         ) VALUES (
-                     #{userId},
-                     #{userNm},
-                     #{pwd},
-                     #{email},
-                     NOW()
+                 #{userId},
+                 #{userNm},
+                 #{pwd},
+                 #{email},
+                 NOW(),
+                  'Y'
                  )
     </insert>
 
