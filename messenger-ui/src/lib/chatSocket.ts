@@ -2,8 +2,8 @@ import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 const wsUrl = import.meta.env.VITE_API_URL
-    ? `${import.meta.env.VITE_API_URL}/ws`
-    : 'http://localhost:8085/hk/ws';
+    ? `${import.meta.env.VITE_API_URL}/ws-chat`
+    : 'http://localhost:8085/ws-chat';
 
 let stompClient: Client | null = null;
 
