@@ -67,7 +67,7 @@
         VALUES(
          #{title}
         , #{loginId}
-        , SYSTIMESTAMP
+        , NOW()
         , 'Y'
         , #{roomId})
 
@@ -85,7 +85,7 @@
         VALUES(
             #{userId}
             , #{memberRole}
-            , SYSTIMESTAMP
+            , NOW()
             , #{roomId}
             , #{memberNm})
     </insert>
@@ -151,7 +151,7 @@
                 #{messageId}
               , #{userId}
               , #{content}
-              , SYSTIMESTAMP
+              , NOW()
               , 'N'
               , #{roomId})
     </insert>
