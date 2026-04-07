@@ -110,8 +110,8 @@
             A.USER_ID AS "userId"
             ,A.USER_NM AS "userNm"
         FROM USER_INFO A
-        WHERE A.USER_ID LIKE '%' || #{userId} || '%'
-        OR A.USER_NM LIKE '%' || #{userNm} || '%'
+        WHERE A.USER_ID LIKE CONCAT('%', #{userId}, '%')
+        OR A.USER_NM LIKE CONCAT('%', #{userNm}, '%')
 
     </select>
 
