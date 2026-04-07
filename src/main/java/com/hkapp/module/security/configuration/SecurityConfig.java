@@ -44,14 +44,13 @@ public class SecurityConfig {
 
                 // URL authorization
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/hk/api/auth/**").permitAll()   // login, logout endpoints
-                        .requestMatchers("/hk/api/**").authenticated()    // everything else requires login
+                        .requestMatchers("/api/auth/**").permitAll()   // login, logout endpoints
+                        .requestMatchers("/api/**").authenticated()    // everything else requires login
                         .anyRequest().permitAll()
                 )
 
-                // Form login — React will call this endpoint as a JSON/form POST
                 .formLogin(form -> form
-                        .loginProcessingUrl("/hk/api/auth/login")
+                        .loginProcessingUrl("/api/auth/login")
                         .usernameParameter("userId")
                         .passwordParameter("password")
                         .successHandler(authenticationSuccessHandler())
@@ -60,7 +59,7 @@ public class SecurityConfig {
                 )
 
                 .logout(logout -> logout
-                        .logoutUrl("/hk/api/auth/logout")
+                        .logoutUrl("/api/auth/logout")
                         .logoutSuccessHandler(logoutSuccessHandler())
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
@@ -69,9 +68,9 @@ public class SecurityConfig {
 
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .invalidSessionUrl("/hk/api/auth/invalid-session")
+                        .invalidSessionUrl("/api/auth/invalid-session")
                         .maximumSessions(1)                            // one session per user
-                        .expiredUrl("/hk/api/auth/session-expired")
+                        .expiredUrl("/api/auth/session-expired")
                 )
 
                 .exceptionHandling(ex -> ex
