@@ -42,10 +42,6 @@ public class SequenceIdServiceImpl implements SequenceIdService {
 
     private final JdbcTemplate jdbcTemplate;
 
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
-
     @Override
     public String nextId(String prefix) {
         validatePrefix(prefix);
@@ -72,7 +68,6 @@ public class SequenceIdServiceImpl implements SequenceIdService {
     public void ensureSequenceExists(String prefix) {
         String upperPrefix = prefix.toUpperCase();
 
-        // Skip if already verified in this JVM session
         if (initializedSequences.containsKey(upperPrefix)) {
             return;
         }
@@ -80,11 +75,6 @@ public class SequenceIdServiceImpl implements SequenceIdService {
         String seqName = sequenceName(upperPrefix);
 
         try {
-            /*
-             * Oracle 18c+ supports CREATE SEQUENCE IF NOT EXISTS.
-             * For older versions (12c/19c without that syntax), we check
-             * USER_SEQUENCES first and create only when absent.
-             */
             boolean exists = sequenceExists(seqName);
             if (!exists) {
                 createSequence(seqName);
@@ -101,12 +91,22 @@ public class SequenceIdServiceImpl implements SequenceIdService {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Internal helpers
-    // -------------------------------------------------------------------------
+    /*private long fetchNextVal(String upperPrefix) {
+        String sql = "SELECT %s.NEXTVAL FROM DUAL".formatted(sequenceName(upperPrefix));
+        try {
+            Long val = jdbcTemplate.queryForObject(sql, Long.class);
+            if (val == null) {
+                throw new SequenceIdException("NEXTVAL returned null for prefix: " + upperPrefix);
+            }
+            return val;
+        } catch (DataAccessException e) {
+            throw new SequenceIdException(
+                    "Failed to fetch NEXTVAL for prefix '%s'".formatted(upperPrefix), e);
+        }
+    }*/
 
     private long fetchNextVal(String upperPrefix) {
-        String sql = "SELECT %s.NEXTVAL FROM DUAL".formatted(sequenceName(upperPrefix));
+        String sql = "SELECT nextval('%s')".formatted(sequenceName(upperPrefix).toLowerCase());
         try {
             Long val = jdbcTemplate.queryForObject(sql, Long.class);
             if (val == null) {
@@ -119,18 +119,37 @@ public class SequenceIdServiceImpl implements SequenceIdService {
         }
     }
 
-    private boolean sequenceExists(String seqName) {
+    /*private boolean sequenceExists(String seqName) {
         String sql = "SELECT COUNT(*) FROM USER_SEQUENCES WHERE SEQUENCE_NAME = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, seqName);
         return count != null && count > 0;
+    }*/
+
+    private boolean sequenceExists(String seqName) {
+        String sql = """
+        SELECT COUNT(*)
+        FROM information_schema.sequences
+        WHERE sequence_name = ?
+        """;
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, seqName.toLowerCase());
+        return count != null && count > 0;
     }
 
-    private void createSequence(String seqName) {
+    /*private void createSequence(String seqName) {
         String sql = """
             CREATE SEQUENCE %s
                 START WITH 1
                 INCREMENT BY 1
             """.formatted(seqName);
+        jdbcTemplate.execute(sql);
+    }*/
+
+    private void createSequence(String seqName) {
+        String sql = """
+        CREATE SEQUENCE %s
+            START WITH 1
+            INCREMENT BY 1
+        """.formatted(seqName.toLowerCase());
         jdbcTemplate.execute(sql);
     }
 
