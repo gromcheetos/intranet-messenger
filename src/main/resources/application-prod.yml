@@ -2,6 +2,11 @@ server:
   port: ${PORT:8085}
   servlet:
     context-path: /hk
+    session:
+      cookie:
+        same-site: none
+        secure: true
+        http-only: true
 
 spring:
   datasource:
