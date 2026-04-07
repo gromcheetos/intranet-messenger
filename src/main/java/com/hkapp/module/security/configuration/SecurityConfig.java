@@ -103,10 +103,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // -------------------------------------------------------------------------
-    // CORS — allow Vite dev server (port 5173)
-    // -------------------------------------------------------------------------
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -124,10 +120,6 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
-
-    // -------------------------------------------------------------------------
-    // Auth handlers — return JSON instead of redirects (React SPA)
-    // -------------------------------------------------------------------------
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
