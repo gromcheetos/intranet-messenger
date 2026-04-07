@@ -203,3 +203,6 @@ The app is deployed using:
 | `/topic/online-users` | Subscribe to online user updates |
 
 ---
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
