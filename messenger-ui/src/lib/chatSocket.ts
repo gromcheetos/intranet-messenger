@@ -11,7 +11,7 @@ export function connectSocket(onConnect?: () => void) {
     if (stompClient?.active) return stompClient;
 
     stompClient = new Client({
-        webSocketFactory: () => new SockJS('http://localhost:8085/ws-chat'),
+        webSocketFactory: () => new SockJS('https://localhost:8085/ws-chat'),
         reconnectDelay: 0,
         debug: (msg) => console.log('[STOMP]', msg),
     });
